@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>L'HOTEL DELLE 101 STANZE</title>
+  <link href="https://fonts.googleapis.com/css2?family=Belleza:wght@400;700&family=Cormorant+Garamond:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Belleza', serif;
+      background: #000a14;
+      color: #e0f0ff;
+      margin: 0; padding: 20px;
+      display: flex; flex-direction: column; align-items: center;
+      min-height: 100vh;
+      background-image:
+        url('https://cdnjs.cloudflare.com/ajax/libs/svg-patterns/1.0.0/pattern-2.svg'),
+        radial-gradient(circle at center, #002244 0%, transparent 70%);
+      background-size:200px 200px,100% 100%;
+      background-repeat: repeat,no-repeat;
+    }
+    .container {
+      max-width:800px; width:100%; margin:0 auto;
+      padding:30px; position:relative;
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .subtitle { text-align:center; color:#e0f0ff; margin-bottom:3px; }
+    h1 {
+      text-align:center; color:#4FC3F7; font-size:3.5em;
+      margin:3px 0 30px; text-shadow:2px 2px 4px rgba(0,0,0,0.8);
+    }
+    .enigma-grid {
+      display:grid; gap:15px;
+      grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+      width:100%; justify-items:center; margin-top:20px;
+    }
+    .enigma-button,
+    .submit-button,
+    .home-button,
+    .hint-button {
+      background:#e0f0ff; color:#001a33; border:none;
+      cursor:pointer; transition:all .3s; border-radius:8px;
+      font-family:'Belleza', serif; box-shadow:0 0 15px #0288D1;
+    }
+    .enigma-button {
+      padding:15px; font-size:14px; width:100%; height:60px;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .enigma-button:hover,
+    .submit-button:hover,
+    .home-button:hover { transform:translateY(-3px) scale(1.05); }
+    .enigma-page { display:none; text-align:center; }
+    .enigma-header { position:relative; padding-top:40px; }
+    
+    /* Nuovo stile per il testo introduttivo dinamico */
+    #enigma27Intro {
+      display: none;
+      font-size: 1.1em;
+      color: #e0f0ff;
+      margin-top: 20px;
+      margin-bottom: 30px;
+      font-style: italic;
+    }
+
+    .enigma-content {
+      display:flex; flex-direction:column; align-items:center;
+      gap:20px; width:100%;
+    }
+    .home-button {
+      position:absolute; top:10px; left:10px;
+      font-size:12px; padding:8px 12px; border-radius:5px; z-index:10;
+    }
+    
+    /* Spaziature aggiornate per la sotto-domanda */
+    #subQuestionText {
+      display: none;
+      font-size: 1.4em;
+      color: #4FC3F7;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      margin:10px 0 20px; padding:12px; width:100%; max-width:280px;
+      font-size:13px; border:2px solid #0288D1;
+      background:rgba(255,255,255,0.1); color:#e0f0ff; border-radius:5px;
+      text-align: center;
+    }
+    .submit-button { padding:14px 28px; font-size:18px; border-radius:5px; }
+    .hint-container {
+      margin-top:30px; display:flex;
+      flex-direction:column; align-items:center;
+    }
+    .hint-buttons {
+      display:flex; justify-content:center;
+      margin-bottom:15px; flex-wrap:wrap;
+    }
+    .hint-button {
+      padding:12px; font-size:16px;
+      margin:5px; border-radius:50%; width:40px; height:40px;
+      opacity:.5;
+    }
+    .hint-button.active { opacity:1; }
+    .hint-button.active:hover { transform:scale(1.1); }
+    .hint-text {
+      display:none; margin-top:15px;
+      background:rgba(2, 136, 209, 0.2); padding:15px; border-radius:5px;
+      max-width:100%;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #result {
+      margin-top:20px; font-weight:bold; font-size:1.2em;
+      padding:12px; border-radius:5px; white-space:pre-line;
+      text-align:center;
+    }
+    .digit-hint {
+      font-size:.9em; margin:10px 0 15px;
+      color:#fff; opacity:.8; white-space:nowrap;
+    }
+    .shake { animation:shake .5s; }
+    @keyframes shake {
+      0%,100%{transform:translateX(0);}
+      25%{transform:translateX(-10px);}
+      50%{transform:translateX(10px);}
+      75%{transform:translateX(-10px);}
+    }
+    .solution-button-container {
+      margin-top:20px; text-align:center;
+    }
+    .solution-button {
+      background:none; border:none;
+      color:#e0f0ff; font-size:14px;
+      opacity:.3; cursor:pointer; transition:opacity .3s;
+    }
+    .solution-button:hover { opacity:.6; }
+    @media(max-width:600px){
+      .container{padding:15px;}
+      h1{font-size:2em;margin-top:50px;}
+      .enigma-button{font-size:12px;height:50px;}
+      .submit-button{font-size:16px;padding:12px 24px;}
+      .home-button{font-size:10px;padding:6px 10px;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <p class="subtitle">Escape the Page</p>
+    <h1>L'HOTEL DELLE 101 STANZE</h1>
+
+    <div id="home" class="enigma-grid"></div>
+
+    <div id="enigmaPage" class="enigma-page">
+      <button class="home-button" onclick="showHome()">❮</button>
+      <div class="enigma-header">
+        <h2 id="enigmaTitle"></h2>
+        <p id="digitHint" class="digit-hint"></p>
+        <p id="enigma27Intro"></p>
+      </div>
+
+      <div class="enigma-content">
+        <div id="subQuestionText"></div>
+        <input type="text" id="answer" placeholder="Inserisci la risposta">
+        <button class="submit-button" id="submitBtn" onclick="checkAnswer()">INVIA</button>
+        <div id="result"></div>
+      </div>
+
+      <div class="hint-container">
+        <div id="hintButtons" class="hint-buttons"></div>
+        <div id="hintText" class="hint-text"></div>
+      </div>
+
+      <div class="solution-button-container">
+        <a id="solutionLink" href="#" target="_blank" rel="noopener noreferrer">
+          <button class="solution-button" id="solutionBtnElement">Soluzione</button>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const enigmas = 27; 
+    
+    // Soluzioni esatte per gli enigmi dall'1 al 26
+    const correctAnswers = {
+      1:"984", 2:"36274", 3:"365", 4:"3715", 5:"86579", 6:"5219",
+      7:"21040", 8:"6291", 9:"502", 10:"329", 11:"61024", 12:"28978",
+      13:"94873", 14:"2057", 15:"6642", 16:"241", 17:"1015", 18:"4613",
+      19:"812", 20:"461", 21:"5819", 22:"35972", 23:"1076", 24:"1497",
+      25:"4133", 26:"101"
+    };
+
+    const solutionLinks = {
+      1: "https://drive.google.com/file/d/1aMPDEd3yGo_EqXwSUJ_ucXzSwzX-0Zb-/view?usp=sharing",
+      2: "https://drive.google.com/file/d/1E4hsqQyHUqtmoBldF5_IzFVLwFqxYQyz/view?usp=sharing",
+      3: "https://drive.google.com/file/d/12wA1eReaZg7jkmRGXHok0aBxcCTN230z/view?usp=sharing",
+      4: "https://drive.google.com/file/d/1ONytVbTd3MQSxvvErp5QN6DAkMqM5hsB/view?usp=sharing",
+      5: "https://drive.google.com/file/d/1HUSwY57v0GXmihNJ4H0aPBdtgdD_2-R0/view?usp=drive_link",
+      6: "https://drive.google.com/file/d/1x_y3KxGCMcYIVQeKAJgUUG-oaCL87CYf/view?usp=sharing",
+      7: "https://drive.google.com/file/d/1gEgfikFI_5Bu3UnIGAQU-igspIjZsIeY/view?usp=drive_link",
+      8: "https://drive.google.com/file/d/1E4I18vDczJF1ok7_sM2o_GBhjxnknBM_/view?usp=drive_link",
+      9: "https://drive.google.com/file/d/1ie5XHn3VOx9lAFe8II7Jkjk7RFeekPhX/view?usp=drive_link",
+      10: "https://drive.google.com/file/d/1d7-18N6q5Kj7zomP-rQnJ1A8wvql_9EF/view?usp=drive_link",
+      11: "https://drive.google.com/file/d/1gmnY5j3fNb_XfbRgAUj1SJ_Dix1t1vhk/view?usp=drive_link",
+      12: "https://drive.google.com/file/d/1ujnd-hsUv-76bruLKsD7RZR2S0bYCAxm/view?usp=drive_link",
+      13: "https://drive.google.com/file/d/17Cz9PSPvL5Am1VzX5FLcS07aU7RK8ARz/view?usp=sharing",
+      14: "https://drive.google.com/file/d/1VshzqO7HLoaufrsIdI74mlkcTWUoSpwR/view?usp=drive_link",
+      15: "https://drive.google.com/file/d/138R3U7ArQkeZg95w57ce84vM2v790xOq/view?usp=drive_link",
+      16: "https://drive.google.com/file/d/1Q1__rmVJlbgePgd1tW85ZCg76PuK3uU6/view?usp=drive_link",
+      17: "https://drive.google.com/file/d/1kvQ23t_wsThzUiB8nXG-BGFT6ZNGEprm/view?usp=drive_link",
+      18: "https://drive.google.com/file/d/1n8SsUkz6rx9-SLa8zPsqcaNdeckQuSW3/view?usp=drive_link",
+      19: "https://drive.google.com/file/d/1OZzwRjd3D07EDPk78LSNASvEGk7qfWS8/view?usp=drive_link",
+      20: "https://drive.google.com/file/d/1aedWCz6GP-xwXOVdgHfXJDEEpW87VJfI/view?usp=drive_link",
+      21: "https://drive.google.com/file/d/1i6tDgSd_ie__47DdvG6tg7HVTXtcXG64/view?usp=drive_link",
+      22: "https://drive.google.com/file/d/1xGihZ2u1lWwmpBbpHH0Ip8S7FeKWWAV6/view?usp=drive_link",
+      23: "https://drive.google.com/file/d/1dR_dhiToDr_BM7UpKbNfRhZbMnM2NojM/view?usp=drive_link",
+      24: "https://drive.google.com/file/d/1OQ-Ml-MBZruRBeZxGSE_58bD18TdHLFz/view?usp=drive_link",
+      25: "https://drive.google.com/file/d/1qEXB96bLzd4mCOjNm4P3-2GNJNgXBwKh/view?usp=drive_link",
+      26: "https://drive.google.com/file/d/11W-Wr9rgJ-6kOwguzp9xvrjseiyrWF4o/view?usp=drive_link"
+    };
+
+    const hints = {
+      1: ["Vuoi indizi anche sul primo enigma? In realtà basta solo aprire gli occhi", "Osserva bene i cavi attorcigliati, alcuni formano delle forme che assomigliano a dei numeri", "Non so cosa altro suggerirti, però posso dirti che il primo numero è un 9 e l’ultimo un 4"],
+      2: ["Un enigma in ascensore, ma i tasti non sembrano aiutare molto… dove sono i numeri?", "Hai provato 47263 e non ha funzionato? Eh lo so, i numeri sono quelli ma qualcosa non va", "Nella pagina di destra una freccia ti indica che devi inserirli da destra a sinistra"],
+      3: ["Stiamo cercando un numero a tre cifre, sicuramente superiore a 122, prova a capire quanto grandi sono i salti tra i numeri della sequenza", "I salti sono molto interessanti: il primo salto è 3, il secondo 9, il terzo 27… qual è la logica della sequenza?", "I salti sono potenze di 3, quindi il quinto salto dovrà essere di 3 alla quinta ovvero 243…"],
+      4: ["L’enigma per aprire il diario è più facile del previsto, osserva attentamente l’aquilone e leggi bene la poesia", "L’aquilone nasconde un numero in ciascuno dei suoi quarti, ma in quale ordine vanno inseriti?", "La poesia dice che il viaggio comincia dove nasce un sorriso, quindi nella parte in alto a sinistra, poi prosegue con uno strappo ovvero in basso a destra e, visto che non vanno messi mai due grandi vicini, il terzo pezzo sarà quello in alto a destra e l’ultimo quello in basso a sinistra"],
+      5: ["Questo enigma è ben più tosto, devi riuscire a inserire tutti i dati di tutti i bambini… ti consiglio di iniziare dai colori e osserva bene anche la foto…", "ll colore preferito di Anna è il bianco, e del bambino alla sua sinistra è verde, ma iil bambino accanto a Giorgio ama il blu, quindi Anna non può essere quella al centro. Quindi Anna è la bimba con il vestitino e ama il bianco, il bambino con il cappello ama il verde e il bambino con la maglietta bianca con una riga ama il blu. Di conseguenza Sofia che ama il rosso, è la bambina al centro mentre per esclusione Giorgio ama il giallo… prosegui incastrando tutto", "Ora, incrociando tutte le informazioni… Giorgio ha 8 anni (dato che gli piace il giallo), mentre il terzo bambino, ha 7 anni e gioca con l’aquilone. Quindi Luca, che ama giocare a pallone, è il secondo bambino. Per esclusione, Sam, che ama la pizza è il bambino che ama il verde! Prova a continuare e sicuramente riuscirai ad abbinare tutte le età correttamente"],
+      6: ["Un dado smontato… penso che qui un paio di forbici sia più che utile", "Sei riuscito a costruire il dado? Ti consiglio di partire dal numero tre e di provare a capre come vanno posizionati i numeri otto e nove… le altre facce poi andranno di conseguenza", "Hai costruito il dado ma non trovi la soluzione? Cerca nell’agenda un biglietto con un dado e osserva…"],
+      7: ["Non ha tanti programmi da poter scegliere questa lavatrice, o sbaglio? Sicuramente non può essere casuale", "L’unico programma che si può scegliere è il lavaggio a 45 gradi… strano vero?  Sicuramente le forme a lato potranno aiutarti", "I gradi non sono solo la temperatura del lavaggio, ma possono essere anche quelli degli… angoli! Quanti angoli da 45° hanno quelle figure?"],
+      8: ["Ma che bella poesia sul post-it, parla di un gigante che fa ombra sul cammino e una torre di sassi. Sta parlando forse di qualche foto appesa alla bacheca?", "Esatto, il gigante è proprio quel grande albero con la torre di sassi lì accanto… e ora? Cerca altri post-it, uno per ogni stagione!", "Se hai trovato tutti i post-it, hai capito quali sono le 4 immagini da osservare? Ma dove si nasconde il codice? Penso tu debba fare qualche buco, ma su un punto preciso della fotografia… ti posso dire che per la primavera devi bucare la torre di sassi!"],
+      9: ["Hai letto la poesia? Parla chiaro: “osserva chi crea questa finta paura”", "Nell’agenda dell’hotel trovi le mani che creano le ombre disegnate sul foglio, quindi qual è il codice?", "Sul foglio è scritto “Quante ne chiudi?”… osserva bene, quante dita vengono chiuse per ciascuna ombra?"],
+      10: ["Sia sul biglietto che sullo specchio ci sono degli strani simboli, penso tu possa averli già visti da qualche parte… non credi?", "Nell’agenda dell’hotel c’è un biglietto lasciato da qualcuno… un alfabeto molto particolare!", "Non devi fare altro che sostituire ogni simbolo con la lettera corrispondente… posso dirti che il primo numero è un tre"],
+      11: ["Qui non ho tanti suggerimenti: esci dal labirinto con attenzione!", "Ignora le lettere nascoste nel labirinto e concentrati sui numeri su cui passi per uscire!", "Devi stare molto attento, a volte passi molto vicino a dei numeri ma non sono parte della soluzione… ad esempio nessun 5 è attraversato dalla via di fuga"],
+      12: ["Un menù delizioso, non trovi? Tanti piatti, tanti prezzi, ma se ti dicessi che il codice non devi cercarlo nei prezzi?", "Se il codice non è nei prezzi vuol dire che è nelle parole… non concentrarti sulle descrizioni ma sui nomi dei piatti, leggili molto attentamente", "In alcuni piatti sono nascosti dei numeri, tipo un bel risOTTO… cercane altri!"],
+      13: ["Il titolo parla chiaro: devi fare attenzione al tavolo del critico, leggi attentamente il foglio e non potrai fare errori", "Beh, non posso aiutarti molto ma possiamo escludere assieme alcuni tavoli, a partire da tutti quelli con quattro sedie o tutti quelli con la tovaglia grigia", "Quindi rimangono solo tavoli bianchi con due sedie, ora assicurati che abbia dei fiori bianchi e che sia circondata da tavoli grigi… e non dimenticarti della forma!"],
+      14: ["Sembra una colazione deliziosa… cereali, biscotti, cornetti… ma non sembrano dei pezzi del tetris?", "Taglia tutti i pezzi del tetris e prova a sistemarli correttamente, parti dalle uova, una volta posizionate quelle gli altri pezzi andranno di conseguenze!", "Ok, ti dico io dove vanno le uova… nell’angolo in basso a destra! E accanto alla uova vanno i biscotti!"],
+      15: ["In questa pagina ci sono tante informazioni, bacchette con una diversa quantità di tacchette, spaghetti con colori e numeri diversi… ma manca ancora qualcosa", "Nell’agenda c’è un biglietto con un piatto di spaghetti disegnato sopra, devi solo seguire quello che dice…", "“Guarda lo spaghetto partendo dal numeretto e quando tocca l’ultima bacchetta…” quindi partendo dal numero 1 segui lo spaghetto più scuro, quante tacche ha l’ultima bacchetta toccata dallo spaghetto?"],
+      16: ["In questo enigma non ci sono tante informazioni, giusto? Solo il disegno di una macchina fotografica, una tazza e un portatile… li hai già visti altrove?", "Proprio così, nella pagina precedente ci sono sia tazze, che macchine fotografiche e anche un portatile… non dovrai mica contare?", "Se sei ancora qua probabilmente è perché non hai contato bene… non c’è niente di nascosto, ma una tazza è rovesciata, hai contato anche quella?"],
+      17: ["Un articolo molto interessante ma non penso tu debba leggere tutto quanto… e soprattutto, cosa ci fa un gioco della settimana enigmistica su un giornale di cronaca?", "Le parole evidenziate nell’articolo formano la frase “Se cancelli il passato trovi la chiave”, ma cancellarlo da dove? Nella griglia c’è scritta la parola passato, ma non penso basti cancellarla", "Quindi, se non basta cancellare la parola passato, cosa dovrai fare? Cancella dalla griglia tutte le lettere che compongono la parola P A S S A T O e vedrai che quelle rimanenti saranno la chiave"],
+      18: ["Questo è uno tra gli enigmi più tosti del libro, ma non è impossibile, ha bisogno solo di tempo e attenzione, usa una delle pagine degli appunti per provare ad incrociare le piante… Ah e fai attenzione, mancano le istruzioni per le foglie, dove saranno?", "Una volta trovato il biglietto riguardo le foglie, hai tutto il materiale per incrociare le piante. Ti consiglio di valutare una qualità alla volta, partendo dal veleno o magari dalle spine. Come? Beh, se la pianta finale è velenosa, vuol dire che i “genitori” sono una pianta velenosa e una non, quindi sicuramente ci saranno un numero dispari di piante velenose tra quelle originali… cosa mi dici delle altre caratteristiche?", "Stai avendo difficoltà ad incrociare le piante? Ti do qualche suggerimento dai, tra le piante originali, solo la prima è velenosa e ha anche le spine ma non è l’unica ad averle. Inoltre tra le piante originali due hanno i fiori neri e una sola li ha bianchi."],
+      19: ["Le etichette di questi raccoglitori non sono nell’ordine corretto, che ne dici di riordinarle tu? Sì, proprio con un paio di forbici!", "Hai tagliato tutte quante le etichette ma non devi andare a caso… cerca di capire quei simboli", "Quei simboli sono numeri, come scritti nel biglietto del signor Martini, ora devi solo metterli in ordine e leggere cosa compare"],
+      20: ["Non dirmi che hai provato davvero 739… lo hai fatto? Va beh, hai capito che era la risposta sbagliata, forse ti sei perso qualcosa…", "Il biglietto nell’agenda mostra quante volte e in che direzione girare le rotelle, ora devi solo provare", "Fai attenzione alle frecce, la prima freccia va girata in basso per tre volte, quindi il numero finale sarà il 4, invece le altre due rotelle?"],
+      21: ["Molto belli questi simboli? Per caso li hai già visti da qualche parte?", "Proprio così, c’è un biglietto nell’agenda con gli stessi geroglifici… ma sono proprio identici? Il foglietto accanto recita “cerca il diverso…”", "Quattro dei simboli sono diversi rispetto a quelli della cornice, come ad esempio la testa della gru che è rivolta dalla parte opposta, ora devi solo trovare i numeri che compongono il codice. Un indizio? La lista della spesa!"],
+      22: ["Ma che bei disegni, non trovi? Una scatola, un orsetto, un orologio… li hai già visti da qualche parte?", "Tutti e cinque sono oggetti presenti nell’hotel, contrassegnati da un numero… devi solo trovarli", "Vuoi qualche indicazione, beh, la scatola era nel corridoio, l’orsetto nella cameretta da bambini, l’orologio nella stanza con le scritte alle pareti,  il lampadario al ristorante e il cappello… nella stanza in cui sei ora"],
+      23: ["Il biglietto parla chiaro, devi disfarti del vecchio tappeto… ti servirà un bel paio di forbici, ma attento, non tagliare le lettere, ti torneranno utili!", "Ora non ti basta che assemblare il tappeto, ogni lettera al suo posto!", "Se hai bisogno anche del terzo indizio forse non sono comparsi i numeri del codice… hai messo i pezzi del tappeto in ordine? Il primo da posizionare è H e l’ultimo è la F"],
+      24: ["Le scritte parlano chiaro, ma se hai bisogno di altri aiuti nessun problema, parti dalla stanza con la sveglia e prosegui in quella con l’aquilone… poi? Mi raccomando, linee rette, usa un righello!", "Dall’aquilone si va alla lavatrice, poi lo specchio rotto, gli spaghetti e il computer…", "Dal computer vai alla piccola cassaforte, poi al mappamondo e, in fine, alla scritta EXIT. E ora? In quali numeri si intersecano le linee?"],
+      25: ["Immagino tu abbia già capito cosa devi fare per risolvere l’enigma: posizionare ogni ospite al suo posto! Ma hai contato il numero delle stanze e il numero degli ospiti?", "Esatto! Una stanza resta vuota, ma non è una qualsiasi… leggi bene l’agenda, una stanza ha le tubature rotte! Ora dovresti riuscire a posizionare tutto!", "Una volta posizionati correttamente gli ospiti, ad esempio il signor Martini nella 1010, inclusa la stanza vuota ovvero la 1017… gli anni di nascita degli ospiti delle stanze 1012 e 1019 sono la chiave, come suggerito sull’agenda"],
+      26: ["Questo enigma è chiaro, no? Devi sommare i numeri delle stanze indicate… le quattro stanze che hai esplorato nel corso dell’avventura… dove le trovi?", "Per ogni stanza, trovi il numero all’interno dell’agenda, con bigliettini, foglietti e appunti… tipo l’adesivo della stanza dell’infanzia trovato nella 1024…", "Per la stanza della paura hai il biglietto con le ombre cinesi, mentre il biglietto delle foglie per la stanza della carriera e infine il foglio con i geroglifici per la stanza dei ricordi"]
+    };
+
+    const enigma27Data = {
+      intros: [
+        "Per uscire da quest'hotel ti manca solo un passo, o meglio, quattro domande... per riscoprire chi sei",
+        "Ti rimangono 3 domande!",
+        "Ti rimangono 2 domande!",
+        "E ora l'ultima domanda, la più importante di tutte!"
+      ],
+      // Questi sono i nuovi testi che appariranno dopo la risposta corretta
+      transitions: [
+        "All'improvviso ti ricordi il tuo nome, come se non l'avessi mai dimenticato...",
+        "Ora ne sei certo, hai sempre temuto di fallire e in questo momento sembra proprio che la paura stia oscurando la tua mente",
+        "Tutto ha di nuovo senso, il tuo voler sempre indagare, scoprire la verità, tutto era collegato al tuo lavoro"
+      ],
+      questions: [
+        "1. Qual è il tuo nome?",
+        "2. Qual è la tua più grande paura?",
+        "3. Qual è il tuo lavoro?",
+        "4. Chi ti ha rinchiuso dentro questo hotel?"
+      ],
+      keywords: [
+        ["SAM"],
+        ["FALLI", "FARCELA", "SUCCESSO", "RIUSCIR", "SBAGLI", "ERROR", "DELUD", "PERDER"],
+        ["GIORNAL", "REPORTER", "CRONIST", "REDATTOR", "ARTICOL"],
+        ["NONN"]
+      ],
+      hints: [
+        "Ognuna delle domande è legata ad una delle stanze di queste hotel e per questa prima domanda devi cercare indizi nella stanza dell'infanzia, più precisamente nel diario del protagonista",
+        "Ognuna delle domande è legata ad una delle stanze di queste hotel e ora siamo nella stanza della paura, e la risposta la troverai in un labirinto di numeri e lettere!",
+        "Ognuna delle domande è legata ad una delle stanze di queste hotel, quindi siamo nella stanza della carriera, anche solo guardandola dovresti capire di che lavoro si tratta",
+        "Ognuna delle domande è legata ad una delle stanze di queste hotel e qui siamo nell'ultima stanza, quella dei ricordi. Ci sono tanti indizi che ti aiuteranno a capire la risposta, fai attenzione a chi aveva occupato la stanza 1010 più di trent'anni fa? Un archeologo non a caso!"
+      ],
+      solutionLinks: [
+        "https://drive.google.com/file/d/1DoCst0Rv97ciTnd9Ur49Sw5tqbPrmbsq/view?usp=drive_link",
+        "https://drive.google.com/file/d/1EF1as4ypTQjObnQxrAAFaE5nctFJjpJz/view?usp=drive_link",
+        "https://drive.google.com/file/d/1B1-KTsrvRyt4xBquhCiYWNYGhTuOQwZM/view?usp=drive_link",
+        "https://drive.google.com/file/d/1wAsALD_xxV3CmYF0DduiMW3xrLIl3i1c/view?usp=drive_link"
+      ]
+    };
+
+    let currentEnigma = 0, currentHint = 0;
+    let currentStep27 = 0;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.history.replaceState({ page: "home" }, "", "");
+      const homeDiv = document.getElementById('home');
+      for (let i = 1; i <= enigmas; i++) {
+        const btn = document.createElement('button');
+        btn.textContent = `ENIGMA ${i}`;
+        btn.className = 'enigma-button';
+        btn.onclick = () => showEnigma(i);
+        homeDiv.appendChild(btn);
+      }
+    });
+
+    function showEnigma(n) {
+      currentEnigma = n;
+      document.getElementById('home').style.display = 'none';
+      document.getElementById('enigmaPage').style.display = 'block';
+      document.getElementById('enigmaTitle').textContent = `ENIGMA ${n}`;
+      document.getElementById('answer').value = '';
+      document.getElementById('result').textContent = '';
+      document.getElementById('answer').style.display = 'block';
+      document.getElementById('submitBtn').style.display = 'block';
+      document.getElementById('solutionBtnElement').style.display = 'inline-block';
+
+      const subQ = document.getElementById('subQuestionText');
+      const hintText = document.getElementById('digitHint');
+      const intro27 = document.getElementById('enigma27Intro');
+      const solLink = document.getElementById('solutionLink');
+
+      if (n === 27) {
+        currentStep27 = 0;
+        intro27.textContent = enigma27Data.intros[0];
+        intro27.style.display = 'block';
+        subQ.textContent = enigma27Data.questions[0];
+        subQ.style.display = 'block';
+        hintText.style.display = 'none';
+        solLink.href = enigma27Data.solutionLinks[0];
+        setupHints27();
+      } else {
+        intro27.style.display = 'none';
+        subQ.style.display = 'none';
+        hintText.style.display = 'block';
+        hintText.textContent = `La risposta è un numero a ${correctAnswers[n].length} cifre`;
+        solLink.href = solutionLinks[n];
+        resetHints();
+      }
+
+      window.scrollTo(0, 0);
+      window.history.pushState({ page: "enigma", enigma: n }, "", `#enigma${n}`);
+    }
+
+    function showHome() {
+      document.getElementById('home').style.display = 'grid';
+      document.getElementById('enigmaPage').style.display = 'none';
+      window.history.replaceState({ page: "home" }, "", "");
+    }
+
+    window.addEventListener("popstate", e => {
+      if (!e.state || e.state.page === "home") showHome();
+    });
+
+    function checkAnswer() {
+      const rd  = document.getElementById('result');
+      const ans = document.getElementById('answer').value.replace(/\s+/g, '').toUpperCase();
+      
+      if (currentEnigma === 27) {
+        const validKeywords = enigma27Data.keywords[currentStep27];
+        const isCorrect = validKeywords.some(kw => ans.includes(kw));
+
+        if (isCorrect) {
+          if (currentStep27 < 3) {
+    // MOSTRA SCHERMATA DI INTRAMEZZO
+    document.getElementById('subQuestionText').style.display = 'none';
+    document.getElementById('answer').style.display = 'none';
+    document.getElementById('submitBtn').style.display = 'none';
+    document.getElementById('enigma27Intro').style.display = 'none';
+    
+    // AGGIUNGI QUESTE RIGHE:
+    document.getElementById('hintButtons').style.display = 'none';
+    document.getElementById('hintText').style.display = 'none';
+    document.getElementById('solutionBtnElement').style.display = 'none';
+    
+    let btnText = currentStep27 === 2 ? "Ultima domanda" : "Prossima domanda";
+    
+    rd.innerHTML = `
+      <p style="color:#4FC3F7; font-style:italic; margin-bottom:20px; line-height:1.6;">${enigma27Data.transitions[currentStep27]}</p>
+      <button class="submit-button" onclick="nextStep27()">${btnText}</button>
+    `;
+} else {
+            // FINE GIOCO
+            rd.innerHTML = `
+              <p style="color:#4FC3F7; margin-bottom:20px;">Corretto!<br>Hai risolto l'ultimo enigma!</p>
+              <p style="color:#ffffff;">
+                Hai completato l'avventura all'Hotel delle 101 stanze!, ora non ti rimane che leggere le ultime pagine per uscire dall'hotel, ma prima lascia che ti ringrazi!<br><br>
+                Grazie mille per aver comprato il nostro libro e giocato con noi.<br><br>
+                Se questi enigmi ti sono piaciuti, non dimenticare di lasciare una sincera recensione su Amazon... A presto!
+              </p>`;
+            document.getElementById('enigma27Intro').style.display = 'none';
+            document.getElementById('answer').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('solutionBtnElement').style.display = 'none';
+            document.getElementById('hintButtons').innerHTML = '';
+            document.getElementById('subQuestionText').style.display = 'none';
+          }
+        } else {
+          rd.textContent = 'Risposta errata. Riprova!';
+          rd.style.color = '#b83838';
+        }
+
+      } else {
+        if (ans === correctAnswers[currentEnigma]) {
+          rd.innerHTML = `<p style="color:#4FC3F7;">Corretto!<br>Hai risolto l'enigma!<br>${[4, 7, 12, 16, 17, 21, 24, 25].includes(currentEnigma) ? 'Risolvi il prossimo enigma!' : 'Procedi con la storia!'}</p>`;
+        } else {
+          rd.textContent = 'Risposta errata. Riprova!';
+          rd.style.color = '#b83838';
+        }
+      }
+
+      rd.classList.remove('shake');
+      void rd.offsetWidth;
+      rd.classList.add('shake');
+    }
+
+    // QUESTA È LA NUOVA FUNZIONE CHE SERVE PER TORNARE ALLE DOMANDE
+   function nextStep27() {
+    currentStep27++;
+    document.getElementById('result').innerHTML = '';
+    document.getElementById('answer').value = '';
+    document.getElementById('answer').style.display = 'block';
+    document.getElementById('submitBtn').style.display = 'block';
+    document.getElementById('subQuestionText').style.display = 'block';
+    document.getElementById('enigma27Intro').style.display = 'block';
+    
+    // AGGIUNGI QUESTE RIGHE PER RIPRISTINARE LA VISIBILITÀ:
+    document.getElementById('hintButtons').style.display = 'flex';
+    document.getElementById('solutionBtnElement').style.display = 'inline-block';
+    
+    document.getElementById('enigma27Intro').textContent = enigma27Data.intros[currentStep27];
+    document.getElementById('subQuestionText').textContent = enigma27Data.questions[currentStep27];
+    document.getElementById('solutionLink').href = enigma27Data.solutionLinks[currentStep27];
+    setupHints27();
+}
+    function resetHints() {
+      currentHint = 0;
+      const hb = document.getElementById('hintButtons');
+      hb.innerHTML = '';
+      (hints[currentEnigma] || []).forEach((_, i) => {
+        const b = document.createElement('button');
+        b.textContent = '💡';
+        b.className = `hint-button${i===0?' active':''}`;
+        b.onclick = () => showHint(i+1);
+        hb.appendChild(b);
+      });
+      document.getElementById('hintText').style.display = 'none';
+    }
+
+    function showHint(n) {
+      if (n <= currentHint+1) {
+        const ht = document.getElementById('hintText');
+        ht.innerHTML = hints[currentEnigma][n-1];
+        ht.style.display = 'block';
+        if (n > currentHint) {
+          currentHint = n;
+          if (n < hints[currentEnigma].length) {
+            document.querySelector(`.hint-button:nth-child(${n+1})`).classList.add('active');
+          }
+        }
+      }
+    }
+
+    function setupHints27() {
+      const hb = document.getElementById('hintButtons');
+      hb.innerHTML = '';
+      const b = document.createElement('button');
+      b.textContent = '💡';
+      b.className = 'hint-button active';
+      b.onclick = () => {
+        const ht = document.getElementById('hintText');
+        ht.innerHTML = enigma27Data.hints[currentStep27];
+        ht.style.display = 'block';
+      };
+      hb.appendChild(b);
+      document.getElementById('hintText').style.display = 'none';
+    }
+
+  </script>
+  <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+      var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+      s1.async=true;
+      s1.src='https://embed.tawk.to/67b838ca74a6b419071d08ba/1ikjprlts';
+      s1.charset='UTF-8';
+      s1.setAttribute('crossorigin','*');
+      s0.parentNode.insertBefore(s1,s0);
+    })();
+  </script>
+  </body>
+</html>
